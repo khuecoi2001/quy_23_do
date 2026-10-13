@@ -15,8 +15,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"></noscript>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
 /* Layout: phone app shell. Sticky header, one scrolling view, fixed tab bar with a raised
    centre action; sheets rise from the bottom, the 3-step "Thêm buổi" flow covers the screen. */
@@ -641,12 +642,13 @@ async function callLink(fn, args) {
 function errText(e) { return String((e && e.message) || e).replace(/^(Exception|Error):\s*/, '').replace(/^\[(PIN|LINK|NET)\] /, ''); }
 function isPinErr(e) { return String((e && e.message) || e).indexOf('[PIN]') >= 0; }
 /* sai/thiếu mã: xoá mã đã nhớ và hỏi lại (kể cả bản không dùng mã, phòng khi Apps Script vẫn đòi mã) */
-function pinFail(e) { setPin(''); showLock(errText(e), { pin: true }); }
+function pinFail(e) { setPin(''); dropSnap(); showLock(errText(e), { pin: true }); }
 function isLinkErr(e) { return String((e && e.message) || e).indexOf('[LINK]') >= 0; }
 async function call(fn, args, ok) {
   if (S.writing) { toast('Đang lưu, chờ chút…'); return null; }
   S.writing = true;
   try {
+    if (S.refreshing) await S.refreshing;               // app vừa mở bằng dữ liệu lần trước: chờ bản mới rồi mới ghi
     const d = await api(fn, ...(args || []));
     setData(d);
     if (d && d.warnings && d.warnings.length) toast(d.warnings.join(' '), { err: true });
@@ -659,10 +661,23 @@ async function call(fn, args, ok) {
     return null;
   } finally { S.writing = false; }
 }
-function setData(d) {
+function setData(d, fromSnap) {
   S.data = d; S.c = compute(d);
+  if (!fromSnap) { S.stale = false; saveSnap(d); }
   render(); refreshLayers();
 }
+/* Bản dữ liệu lần trước lưu trên máy: mở app là hiện ngay, bản mới tải phía sau rồi thay vào. */
+const DATA_KEY = 'qlt_data';
+function saveSnap(d) {
+  if (typeof PROTOTYPE !== 'undefined' && PROTOTYPE) return;
+  try { const o = Object.assign({}, d); delete o.warnings; delete o.undo; store(DATA_KEY, JSON.stringify({ t: Date.now(), d: o })); } catch (e) { /* bộ nhớ đầy: bỏ qua */ }
+}
+function loadSnap() {
+  try { const o = JSON.parse(store(DATA_KEY) || 'null'); return o && o.d && Array.isArray(o.d.expenses) && Array.isArray(o.d.members) ? o : null; }
+  catch (e) { return null; }
+}
+function dropSnap() { store(DATA_KEY, null); }
+function hhmm(t) { const d = new Date(t); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0'); }
 const PIN_KEY = 'qlt_pin';
 const NO_PIN = !!CFG.noPin;
 function pinOff() { return NO_PIN || !!(S.data && S.data.settings && S.data.settings.noPin); }
@@ -1395,6 +1410,7 @@ document.addEventListener('submit', e => {
   if (li) {
     const u = li.value.trim();
     if (!validLink(u)) { showLock('Link phải có dạng https://script.google.com/macros/s/…/exec', { link: true }); return; }
+    if (u !== apiLink()) dropSnap();                  // đổi sang sheet khác: bỏ dữ liệu cũ đã lưu
     store(LINK_KEY, u);
   }
   const pi = $('lockIn');
@@ -1449,7 +1465,7 @@ const A = {
   },
   relink: () => showLock('', { link: true }),
   retryBoot: () => { $('lock').hidden = true; boot(); },
-  lockNow: async () => { if (await confirmBox('Khoá app trên máy này?', 'Lần sau mở app sẽ phải nhập lại mã truy cập.', 'Khoá')) { setPin(''); showLock(); } },
+  lockNow: async () => { if (await confirmBox('Khoá app trên máy này?', 'Lần sau mở app sẽ phải nhập lại mã truy cập.', 'Khoá')) { setPin(''); dropSnap(); showLock(); } },
   pick: el => topLayer().pick(el.dataset.code),
   depositFor: el => openDepositForm(el.dataset.code),
   qr: el => openQR(el.dataset.code),
@@ -1604,20 +1620,33 @@ document.addEventListener('visibilitychange', async () => {
   if (document.hidden) { hiddenAt = Date.now(); return; }
   if (!hiddenAt || Date.now() - hiddenAt < 30000) return;
   hiddenAt = 0;
-  if (!S.data || S.layers.length || S.writing || !$('lock').hidden) return;
-  try { setData(await api('getData')); }
+  if (!S.data || S.layers.length || S.writing || S.refreshing || !$('lock').hidden) return;
+  const job = api('getData'); S.refreshing = job.then(() => {}, () => {});
+  try { setData(await job); }
   catch (e) { if (isPinErr(e)) pinFail(e); }
+  finally { S.refreshing = null; }
 });
 
 /* ---------- start ---------- */
 async function boot() {
-  try { setData(await api('getData')); }
+  const job = api('getData'); S.refreshing = job.then(() => {}, () => {});
+  try { setData(await job); }
   catch (e) {
     if (isPinErr(e)) pinFail(e);
     else if (isLinkErr(e)) showLock(errText(e), { link: true });
     else if (IS_APP && !S.data) showLock(errText(e), { retry: true });
+    else if (S.stale) toast('Chưa tải được bản mới, đang xem dữ liệu lúc ' + hhmm(S.snapAt) + '. ' + errText(e), { err: true });
     else toast('Không tải được dữ liệu: ' + errText(e), { err: true });
+  } finally { S.refreshing = null; }
+}
+/* mở app: hiện ngay dữ liệu lần trước (nếu có) rồi tải bản mới */
+function start() {
+  const snap = loadSnap();
+  if (snap) {
+    try { S.stale = true; S.snapAt = snap.t; setData(snap.d, true); }
+    catch (e) { S.stale = false; S.data = null; dropSnap(); }
   }
+  boot();
 }
 /* có mạng lại khi đang ở màn hình báo mất mạng: tự tải lại */
 window.addEventListener('online', () => { if (!S.data && $('retryForm') && !$('lock').hidden) A.retryBoot(); });
@@ -1628,12 +1657,12 @@ window.addEventListener('appinstalled', () => { S.installEvt = null; if (S.data)
 (function readSetupLink() {
   const m = /[#&]api=([^&]+)/.exec(location.hash || '');
   if (!m) return;
-  try { const u = decodeURIComponent(m[1]); if (validLink(u)) store(LINK_KEY, u); } catch (e) { /* bỏ qua */ }
+  try { const u = decodeURIComponent(m[1]); if (validLink(u)) { if (u !== apiLink()) dropSnap(); store(LINK_KEY, u); } } catch (e) { /* bỏ qua */ }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* bỏ qua */ }
 })();
 applyTheme();
 if (typeof PROTOTYPE !== 'undefined' && PROTOTYPE) boot();
-else if (NO_PIN ? IS_APP && !validLink(apiLink()) : !getPin()) showLock(); else boot();
+else if (NO_PIN ? IS_APP && !validLink(apiLink()) : !getPin()) showLock(); else start();
 </script>
 <script>
 if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
