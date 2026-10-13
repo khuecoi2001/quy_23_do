@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-palette="blue" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quỹ 2 3 dô</title>
 <meta name="description" content="Quản lý quỹ nhóm cầu lông 2 3 dô">
-<meta name="theme-color" content="#F1F4F0">
+<meta name="theme-color" content="#EEF3F9">
 <meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Quỹ 2 3 dô">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=2">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +25,7 @@
   --fg:#111C16; --fg-2:#34443B; --muted:#5F6E66;
   --accent:#0B7A4B; --accent-strong:#075F3A; --accent-ink:#FFFFFF; --accent-soft:#DCEFE3;
   --hero:#0A4A31; --hero-2:#0D6040; --hero-ink:#F0FAF4; --hero-muted:#A6D4BB; --shuttle:#D8EF5C;
+  --shuttle-ink:#16210A; --fab-glow:rgba(11,122,75,.32);
   --debt:#B53A10; --debt-soft:#FBE8DF; --pos:#0B7A4B; --pos-soft:#DCEFE3;
   --scrim:rgba(8,20,14,.45); --shadow:0 1px 2px rgba(14,32,22,.05),0 10px 30px rgba(14,32,22,.08);
   --focus:#1D6FD1;
@@ -61,6 +62,33 @@
   --av7b:#3C2313;--av7f:#F5B389; --av8b:#232E3A;--av8f:#B7C5D5;
   color-scheme:dark;
 }
+/* Bảng màu xanh dương (khớp biểu tượng app 2 3 dô): <html data-palette="blue"> */
+:root[data-palette="blue"]{
+  --bg:#EEF3F9; --surface-2:#E4EBF4; --line:#D5DFEB;
+  --fg:#0F1A2A; --fg-2:#33445A; --muted:#5B697C;
+  --accent:#1F5FBF; --accent-strong:#174A97; --accent-ink:#FFFFFF; --accent-soft:#DCE7F8;
+  --hero:#173F7A; --hero-2:#1F5099; --hero-ink:#F2F7FF; --hero-muted:#AFC6EA; --shuttle:#FFC94A;
+  --shuttle-ink:#2A1C00; --fab-glow:rgba(31,95,191,.32);
+  --scrim:rgba(8,14,28,.45); --shadow:0 1px 2px rgba(14,24,44,.05),0 10px 30px rgba(14,24,44,.08);
+}
+@media (prefers-color-scheme: dark){:root[data-palette="blue"]:not([data-theme="light"]){
+  --bg:#0A0F17; --surface:#111A26; --surface-2:#182334; --line:#233044;
+  --fg:#E6EDF7; --fg-2:#C0CCDC; --muted:#8C9AAE;
+  --accent:#5B9BF0; --accent-strong:#84B4F5; --accent-ink:#04122A; --accent-soft:#132B4D;
+  --hero:#112B54; --hero-2:#173868; --hero-ink:#EEF4FF; --hero-muted:#A0BAE2; --shuttle:#FFC94A;
+  --shuttle-ink:#2A1C00; --fab-glow:rgba(0,0,0,.4);
+  --scrim:rgba(0,0,0,.62); --shadow:0 1px 0 rgba(255,255,255,.03);
+}}
+:root[data-palette="blue"][data-theme="dark"]{
+  --bg:#0A0F17; --surface:#111A26; --surface-2:#182334; --line:#233044;
+  --fg:#E6EDF7; --fg-2:#C0CCDC; --muted:#8C9AAE;
+  --accent:#5B9BF0; --accent-strong:#84B4F5; --accent-ink:#04122A; --accent-soft:#132B4D;
+  --hero:#112B54; --hero-2:#173868; --hero-ink:#EEF4FF; --hero-muted:#A0BAE2; --shuttle:#FFC94A;
+  --shuttle-ink:#2A1C00; --fab-glow:rgba(0,0,0,.4);
+  --scrim:rgba(0,0,0,.62); --shadow:0 1px 0 rgba(255,255,255,.03);
+}
+.swatch{width:14px;height:14px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.seg.pal button{display:flex;align-items:center;justify-content:center;gap:8px}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -99,7 +127,7 @@ button{cursor:pointer}
 .tab[aria-current="page"] span{font-weight:700}
 .fab-wrap{display:flex;justify-content:center}
 .fab{width:58px;height:58px;border-radius:20px;border:0;background:var(--accent);color:var(--accent-ink);
-  display:grid;place-items:center;transform:translateY(-14px);box-shadow:0 8px 20px rgba(11,122,75,.32)}
+  display:grid;place-items:center;transform:translateY(-14px);box-shadow:0 8px 20px var(--fab-glow)}
 .fab svg{width:28px;height:28px}
 
 /* ---------- Building blocks ---------- */
@@ -372,7 +400,7 @@ textarea.input{min-height:200px;resize:vertical;line-height:1.5;font-size:15px}
 .lock h1{margin:0;font-size:22px}
 .lock p{margin:0;color:var(--hero-muted);font-size:14px}
 .lock .input{background:var(--hero-2);border-color:transparent;color:var(--hero-ink);text-align:center;font-size:18px}
-.lock .btn{background:var(--shuttle);color:#16210A}
+.lock .btn{background:var(--shuttle);color:var(--shuttle-ink)}
 .lock .lock-link{font-size:14px;text-align:left}
 .lock .lock-link::placeholder,.lock .input::placeholder{color:var(--hero-muted);opacity:.8}
 .lock-msg{color:var(--shuttle)!important;font-weight:600}
@@ -406,7 +434,7 @@ textarea.input{min-height:200px;resize:vertical;line-height:1.5;font-size:15px}
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <div id="lock" class="lock" hidden></div>
 <script>const PWA = true;
-const APP_CONFIG = {"appName": "Quản lý quỹ 2 3 dô", "fundLabel": "Quỹ 2 3 dô", "transferTag": "2 3 do", "sheetName": "2 3 dô", "storePrefix": "q23:", "noPin": true};
+const APP_CONFIG = {"appName": "Quản lý quỹ 2 3 dô", "fundLabel": "Quỹ 2 3 dô", "transferTag": "2 3 do", "sheetName": "2 3 dô", "storePrefix": "q23:", "noPin": true, "palette": "blue", "theme": "light"};
 </script>
 <script>
 /* Quản lý quỹ — giao diện dùng chung cho các quỹ cầu lông. Dữ liệu tiền tính bằng nghìn đồng (k). */
@@ -418,7 +446,9 @@ const CFG = Object.assign({
   transferTag: 'Long thu',           // nội dung chuyển khoản: "<Tên> dong quy <tag> dd-mm"
   sheetName: 'Lông thủ NSMO',        // tên file Google Sheet (hiện ở Cài đặt)
   storePrefix: '',                   // tiền tố bộ nhớ, để 2 app trên cùng tên miền không lẫn nhau
-  noPin: false                       // true = mở app không cần mã truy cập (Code.gs đặt requirePin: false)
+  noPin: false,                      // true = mở app không cần mã truy cập (Code.gs đặt requirePin: false)
+  palette: 'green',                  // màu mặc định: 'green' (xanh lá) hoặc 'blue' (xanh dương)
+  theme: 'auto'                      // chế độ mặc định: 'auto' | 'light' | 'dark'
 }, typeof APP_CONFIG !== 'undefined' ? APP_CONFIG : {});
 const FUND = 'Quỹ';
 const PRE_BUY = 'Quỹ - đặt trước';   // quỹ trả trước tiền sân, chưa chia cho ai
@@ -640,13 +670,16 @@ function getPin() { return store(PIN_KEY) || S.pinMem || ''; }
 function setPin(p) { S.pinMem = p; store(PIN_KEY, p || null); }
 
 /* ---------- theme ---------- */
+const PALETTES = { blue: ['Xanh dương', '#1F5FBF', '#EEF3F9', '#0A0F17'], green: ['Xanh lá', '#0B7A4B', '#F1F4F0', '#0A100D'] };
+function curTheme() { const t = store('qlt_theme') || CFG.theme; return ['auto', 'light', 'dark'].indexOf(t) >= 0 ? t : 'auto'; }
+function curPalette() { const p = store('qlt_palette') || CFG.palette; return PALETTES[p] ? p : 'green'; }
 function applyTheme() {
-  const t = store('qlt_theme') || 'auto';
-  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', t);
+  const t = curTheme(), p = curPalette(), root = document.documentElement;
+  if (t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t);
+  if (p === 'green') root.removeAttribute('data-palette'); else root.setAttribute('data-palette', p);
   const dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.setAttribute('content', dark ? '#0A100D' : '#F1F4F0');
+  if (m) m.setAttribute('content', PALETTES[p][dark ? 3 : 2]);
 }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); } catch (e) { /* bỏ qua */ }
 
@@ -797,11 +830,14 @@ function vMembers() {
 
 /* ---------- Cài đặt ---------- */
 function vSettings() {
-  const t = store('qlt_theme') || 'auto', b = S.data.settings && S.data.settings.bank;
+  const t = curTheme(), pal = curPalette(), b = S.data.settings && S.data.settings.bank;
   const bankName = b ? (BANKS.find(x => x[0] === b.bin) || [0, 'Mã ' + b.bin])[1] : '';
   return '<div class="group"><h2>Giao diện</h2><div class="card"><div class="seg" role="group" aria-label="Chế độ hiển thị">' +
     [['auto', 'Tự động'], ['light', 'Sáng'], ['dark', 'Tối']].map(o => '<button data-act="theme" data-t="' + o[0] + '" aria-pressed="' + (t === o[0]) + '">' + o[1] + '</button>').join('') +
-    '</div><p class="hint" style="margin:10px 2px 0">Tự động: theo chế độ sáng/tối của điện thoại.</p></div></div>' +
+    '</div><p class="hint" style="margin:8px 2px 14px">Tự động: theo chế độ sáng/tối của điện thoại.</p>' +
+    '<div class="seg pal" role="group" aria-label="Màu giao diện">' +
+    Object.keys(PALETTES).map(k => '<button data-act="palette" data-p="' + k + '" aria-pressed="' + (pal === k) + '"><span class="swatch" style="background:' + PALETTES[k][1] + '"></span>' + PALETTES[k][0] + '</button>').join('') +
+    '</div></div></div>' +
     '<div class="group"><h2>Nhận tiền</h2><div class="card set-list"><button class="setrow" data-act="bank"><span class="ic">' + ic('bank') + '</span><span class="main"><span class="t">Tài khoản nhận quỹ</span>' +
     '<span class="s">' + (b ? esc(bankName + ' · ' + b.acct) : 'Chưa nhập · cần để tạo mã QR') + '</span></span>' + ic('right', 'chev') + '</button></div></div>' +
     '<div class="group"><h2>Thành viên</h2><div class="card set-list"><button class="setrow" data-act="manage"><span class="ic">' + ic('users') + '</span><span class="main"><span class="t">Quản lý thành viên</span>' +
@@ -1401,6 +1437,7 @@ const A = {
   histMember: () => picker({ title: 'Lọc theo người', clear: true, all: true, cur: S.hist.member, onPick: c => { S.hist.member = c; render(); } }),
   memf: el => { S.memf = el.dataset.f; render(); },
   theme: el => { store('qlt_theme', el.dataset.t); applyTheme(); render(); },
+  palette: el => { store('qlt_palette', el.dataset.p); applyTheme(); render(); },
   bank: () => openBank(),
   manage: () => openManage(),
   pin: () => openPinChange(),

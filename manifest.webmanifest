@@ -3,13 +3,12 @@
   "short_name": "Quỹ 2 3 dô",
   "description": "Quản lý quỹ nhóm cầu lông 2 3 dô: buổi chơi, nộp quỹ, tiền sân đặt trước, nhắc nợ.",
   "lang": "vi",
-  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#173F7A",
-  "theme_color": "#F1F4F0",
+  "theme_color": "#EEF3F9",
   "icons": [
     {
       "src": "icon-192.png",
